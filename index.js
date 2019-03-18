@@ -60,6 +60,26 @@ server.get('/api/users/:id', (req, res) => {
 });
 
 
+server.delete('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    db.remove(id)
+        .then(response => {
+            if (response === 0) {
+                res.status(404).json({ errorMessage: "The user with the specified ID does not exist." });
+                return;
+            }
+            res.json({ success: `User with id: ${id} removed from system` });
+        })
+        .catch(error => {
+            res.status(500).json({ errorMessage: "The user could not be removed." });
+            return;
+        });
+});
+
+
+
+
+
 // configures our server to execute a function for every GET request to "/"
 // the second argument passed to the .get() method is the "Route Handler Function"
 // the route handler function will run on every GET request to "/"
