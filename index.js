@@ -55,8 +55,6 @@ server.get('/api/users/:id', (req, res) => {
         .catch(error => {
             res.status(500).json({ errorMessage: "Error looking up user" });
         });
-    // invoke proper db.method(id) passing it the id.
-    // handle the promise like above
 });
 
 
@@ -72,6 +70,38 @@ server.delete('/api/users/:id', (req, res) => {
         })
         .catch(error => {
             res.status(500).json({ errorMessage: "The user could not be removed." });
+            return;
+        });
+});
+
+
+server.put('/api/users/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, bio } = req.body;
+    if (!name || !bio) {
+        res.status(400).json({ errorMessage: "Please provide name and bio for the user." });
+        return;
+    }
+    db.update(id, { name, bio })
+        .then(response => {
+            if (response == 0) {
+                res.status(404).json({ errorMessage: "The user with the specified ID does not exist." });
+                return;
+            }
+            db.findById(id)
+                .then(user => {
+                    if (user.length === 0) {
+                        res.status(404).json({ errorMessage: "User with that id not found." });
+                        return;
+                    }
+                    res.json(user);
+                })
+                .catch(error => {
+                    res.status(500).json({ errorMessage: "Error looking up user." });
+                });
+        })
+        .catch(error => {
+            res.status(500).json({ errorMessage: "Something bad happened in the database." });
             return;
         });
 });
